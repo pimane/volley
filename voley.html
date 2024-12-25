@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volleyball Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .scoreboard {
+            font-size: 18px;
+            margin: 20px;
+        }
+        .team-matrix {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .team-matrix div {
+            margin: 0 10px;
+        }
+        .matrix {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 5px;
+        }
+        .matrix label {
+            text-align: left;
+        }
+        .teams-container {
+            display: flex;
+            justify-content: space-between; /* Add space between the two sections */
+            gap: 20px; /* Optional gap between the sections */
+        }
+        #courtMatrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;  /* 3 columns */
+            grid-template-rows: 1fr 1fr;        /* 2 rows */
+            gap: 10px;
+            width: 200px;
+            margin: 0 auto;
+        }
+
+        #courtMatrix div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #000;
+            height: 50px;  /* You can adjust the height based on your preference */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Volleyball Tracker</h1>
+
+    <!-- All-Time Score Display -->
+    <div class="scoreboard">
+        <h2>Scoreboard</h2>
+        <div id="scoreBoard">Team A: 0 | Team B: 0</div>
+    </div>
+
+    <div class="teams-container">
+        <div id="teamaMatrixShow">
+            <h3>Team A Player Positions</h3>
+            <div id="courtMatrix" class="court-grid">
+                <div id="position4"></div>
+                <div id="position3"></div>
+                <div id="position2"></div>
+                <div id="position5"></div>
+                <div id="position6"></div>
+                <div id="position1"></div>
+            </div>
+        </div>
+
+        <div id="teambMatrixShow">
+            <h3>Team B Player Positions</h3>
+            <div id="courtMatrix" class="court-grid">
+                <div id="position4"></div>
+                <div id="position3"></div>
+                <div id="position2"></div>
+                <div id="position5"></div>
+                <div id="position6"></div>
+                <div id="position1"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team Setup -->
+    <div id="teamSetup">
+        <h2>Assign Player Numbers for Teams</h2>
+        <div class="team-matrix">
+            <!-- Team A Matrix -->
+            <div>
+                <h3>Team A</h3>
+                <div class="matrix" id="teamaMatrix">
+                    <!-- Dynamic Content Here -->
+                </div>
+            </div>
+            <!-- Team B Matrix -->
+            <div>
+                <h3>Team B</h3>
+                <div class="matrix" id="teambMatrix">
+                    <!-- Dynamic Content Here -->
+                </div>
+            </div>
+        </div>
+        <button onclick="validateAndStartGame()">Start Game</button>
+    </div>
+
+    <!-- Team Selection -->
+    <div id="teamSelection" class="hidden">
+        <h2>Choose a Team</h2>
+        <button onclick="selectTeam('Team A')">Team A</button>
+        <button onclick="selectTeam('Team B')">Team B</button>
+        <button onclick="substitutePlayer()">Substitution</button>
+        <!-- Rotation Buttons -->
+        <button onclick="rotateTeam('Team A')">Make Rotation Team A</button>
+        <button onclick="rotateTeam('Team B')">Make Rotation Team B</button>
+    </div>
+
+    <!-- Position Selection -->
+    <div id="positionSelection" class="hidden">
+        <h2>Choose a Position (1-6)</h2>
+        <button onclick="selectPosition(1)">Position 1</button>
+        <button onclick="selectPosition(2)">Position 2</button>
+        <button onclick="selectPosition(3)">Position 3</button>
+        <button onclick="selectPosition(4)">Position 4</button>
+        <button onclick="selectPosition(5)">Position 5</button>
+        <button onclick="selectPosition(6)">Position 6</button>
+    </div>
+
+    <!-- Action Selection -->
+    <div id="actionSelection" class="hidden">
+        <h2>Choose an Action</h2>
+        <button onclick="selectAction('Serve')">Serve</button>
+        <button onclick="selectAction('Spike')">Spike</button>
+        <button onclick="selectAction('Receive')">Receive</button>
+        <button onclick="selectAction('Block')">Block</button>
+        <button onclick="selectAction('Pass')">Pass</button>
+        <button onclick="selectAction('Defence')">Defence</button>
+        <button onclick="selectAction('Attack')">Attack</button>
+    </div>
+
+    <!-- Result Selection -->
+    <div id="resultSelection" class="hidden">
+        <h2>Choose a Result for the Action</h2>
+        <button onclick="selectResult('Point for Team')">Point for Team</button>
+        <button onclick="selectResult('Point for Other Team')">Point for Other Team</button>
+        <button onclick="selectResult('Continue Play')">Continue Play</button>
+    </div>
+
+    <!-- Substitution -->
+    <div id="substitution" class="hidden">
+        <h2>Substitution</h2>
+        <label>Team:
+            <select id="subTeam">
+                <option value="Team A">Team A</option>
+                <option value="Team B">Team B</option>
+            </select>
+        </label>
+        <label>Position:
+            <input type="number" id="subPosition" min="1" max="6">
+        </label>
+        <label>New Player Number:
+            <input type="number" id="newPlayerNumber">
+        </label>
+        <button onclick="performSubstitution()">Confirm Substitution</button>
+        <button onclick="cancelSubstitution()">Cancel</button>
+    </div>
+
+    <!-- Export Actions -->
+    <button id="exportActions" onclick="exportActionsToFile()">Export Actions</button>
+
+    <script>
+        // Use a single matrix to store both teams' players
+        let teamsMatrix = {
+            'Team A': Array(6).fill(null),
+            'Team B': Array(6).fill(null)
+        };
+
+        let currentTeam = '';
+        let currentPosition = '';
+        let currentAction = '';
+        let actionHistory = [];
+        let scores = { 'Team A': 0, 'Team B': 0 };
+
+        // Rotates the team players
+        function rotateTeam(team) {
+            const teamMatrix = teamsMatrix[team === 'Team A' ? 'Team A' : 'Team B'];
+            
+            // Store the first player to place it in the last position
+            const firstPlayer = teamMatrix[0];
+
+            // Rotate positions from 0 to 4 (positions 1 to 5)
+            for (let i = 0; i < 5; i++) {
+                teamMatrix[i] = teamMatrix[i + 1];
+            }
+
+            // Move the first player to the last position
+            teamMatrix[5] = firstPlayer;
+
+            // Update the UI to reflect the changes
+            updateMatrixDisplay(team); // This will update the matrix visually
+        }
+
+        function updateMatrixDisplay(team) {
+            const teamMatrix = teamsMatrix[team === 'Team A' ? 'Team A' : 'Team B'];
+            const matrixDiv = document.getElementById(`${team.replace(' ', '').toLowerCase()}MatrixShow`);
+
+            // Update each position with the player number
+            for (let i = 0; i < 6; i++) {
+                matrixDiv.querySelector(`#position${i + 1}`).textContent = teamMatrix[i] || '';
+            }
+        }
+
+        function renderTeamSetupMatrix() {
+            ['Team A', 'Team B'].forEach(team => {
+                const container = document.getElementById(`${team.replace(' ', '').toLowerCase()}Matrix`);
+                container.innerHTML = ''; // Clear previous content
+                teamsMatrix[team].forEach((_, index) => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <label>Position ${index + 1}:</label>
+                        <input type="number" onchange="updatePlayer('${team}', ${index}, this.value)">
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        function updatePlayer(team, position, number) {
+            teamsMatrix[team][position] = parseInt(number);
+        }
+
+        function validateAndStartGame() {
+            if (Object.values(teamsMatrix).flat().some(value => isNaN(value))) {
+                alert("All positions must have valid player numbers!");
+                return;
+            }
+            document.getElementById('teamSetup').classList.add('hidden');
+            document.getElementById('teamSelection').classList.remove('hidden');
+            updateMatrixDisplay("Team A");
+            updateMatrixDisplay("Team B");
+        }
+
+        function selectTeam(team) {
+            currentTeam = team;
+            document.getElementById('teamSelection').classList.add('hidden');
+            document.getElementById('positionSelection').classList.remove('hidden');
+        }
+
+        function selectPosition(position) {
+            currentPosition = position;
+            document.getElementById('positionSelection').classList.add('hidden');
+            document.getElementById('actionSelection').classList.remove('hidden');
+        }
+
+        function selectAction(action) {
+            currentAction = action;
+            document.getElementById('actionSelection').classList.add('hidden');
+            document.getElementById('resultSelection').classList.remove('hidden');
+        }
+
+        function selectResult(result) {
+            const playerNumber = teamsMatrix[currentTeam][currentPosition - 1];
+            const actionDetails = `Team ${currentTeam}, Player ${playerNumber}, Position ${currentPosition}, Action: ${currentAction}, Result: ${result}`;
+            actionHistory.push(actionDetails);
+
+            if (result === 'Point for Team') {
+                scores[currentTeam]++;
+            } else if (result === 'Point for Other Team') {
+                const otherTeam = currentTeam === 'Team A' ? 'Team B' : 'Team A';
+                scores[otherTeam]++;
+            }
+
+            updateScoreBoard();
+            document.getElementById('resultSelection').classList.add('hidden');
+            document.getElementById('teamSelection').classList.remove('hidden');
+        }
+
+        function updateScoreBoard() {
+            document.getElementById('scoreBoard').textContent = `Team A: ${scores['Team A']} | Team B: ${scores['Team B']}`;
+        }
+
+        function substitutePlayer() {
+            document.getElementById('teamSelection').classList.add('hidden');
+            document.getElementById('substitution').classList.remove('hidden');
+        }
+
+        
+        function performSubstitution() {
+            const team = document.getElementById('subTeam').value;
+            const position = parseInt(document.getElementById('subPosition').value) - 1;
+            const newPlayer = parseInt(document.getElementById('newPlayerNumber').value);
+            teamsMatrix[team][position] = newPlayer;
+            updateMatrixDisplay(team)
+            cancelSubstitution();
+        }
+
+        function cancelSubstitution() {
+            document.getElementById('substitution').classList.add('hidden');
+            document.getElementById('teamSelection').classList.remove('hidden');
+        }
+
+        function exportActionsToFile() {
+            const data = JSON.stringify(actionHistory, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'actionHistory.json';
+            link.click();
+        }
+
+        renderTeamSetupMatrix();
+    </script>
+</body>
+</html>
