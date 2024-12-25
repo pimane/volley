@@ -77,24 +77,24 @@
         <div id="teamaMatrixShow">
             <h3>Team A Player Positions</h3>
             <div id="courtMatrix" class="court-grid">
-                <div id="position4"></div>
-                <div id="position3"></div>
-                <div id="position2"></div>
-                <div id="position5"></div>
-                <div id="position6"></div>
-                <div id="position1"></div>
+                <div id="position4" onClick="selectTeam('Team A'); selectPosition(4);" style="cursor: pointer;"></div>
+                <div id="position3" onClick="selectTeam('Team A'); selectPosition(3);" style="cursor: pointer;"></div>
+                <div id="position2" onClick="selectTeam('Team A'); selectPosition(2);" style="cursor: pointer;"></div>
+                <div id="position5" onClick="selectTeam('Team A'); selectPosition(5);" style="cursor: pointer;"></div>
+                <div id="position6" onClick="selectTeam('Team A'); selectPosition(6);" style="cursor: pointer;"></div>
+                <div id="position1" onClick="selectTeam('Team A'); selectPosition(1);" style="cursor: pointer;"></div>
             </div>
         </div>
 
         <div id="teambMatrixShow">
             <h3>Team B Player Positions</h3>
             <div id="courtMatrix" class="court-grid">
-                <div id="position4"></div>
-                <div id="position3"></div>
-                <div id="position2"></div>
-                <div id="position5"></div>
-                <div id="position6"></div>
-                <div id="position1"></div>
+                <div id="position4" onClick="selectTeam('Team B'); selectPosition(4);" style="cursor: pointer;"></div>
+                <div id="position3" onClick="selectTeam('Team B'); selectPosition(3);" style="cursor: pointer;"></div>
+                <div id="position2" onClick="selectTeam('Team B'); selectPosition(2);" style="cursor: pointer;"></div>
+                <div id="position5" onClick="selectTeam('Team B'); selectPosition(5);" style="cursor: pointer;"></div>
+                <div id="position6" onClick="selectTeam('Team B'); selectPosition(6);" style="cursor: pointer;"></div>
+                <div id="position1" onClick="selectTeam('Team B'); selectPosition(1);" style="cursor: pointer;"></div>
             </div>
         </div>
     </div>
@@ -123,9 +123,9 @@
 
     <!-- Team Selection -->
     <div id="teamSelection" class="hidden">
-        <h2>Choose a Team</h2>
-        <button onclick="selectTeam('Team A')">Team A</button>
-        <button onclick="selectTeam('Team B')">Team B</button>
+        <h2>Choose</h2>
+        <!--<button onclick="selectTeam('Team A')">Team A</button>
+        <button onclick="selectTeam('Team B')">Team B</button>-->
         <button onclick="substitutePlayer()">Substitution</button>
         <!-- Rotation Buttons -->
         <button onclick="rotateTeam('Team A')">Make Rotation Team A</button>
@@ -223,7 +223,7 @@
 
             // Update each position with the player number
             for (let i = 0; i < 6; i++) {
-                matrixDiv.querySelector(`#position${i + 1}`).textContent = teamMatrix[i] || '';
+                matrixDiv.querySelector(`#position${i + 1}`).textContent = `${teamMatrix[i] || ''}`;
             }
         }
 
